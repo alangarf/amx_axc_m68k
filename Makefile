@@ -6,7 +6,10 @@ DUMP=$(M68K)-objdump
 
 CPU=-m68000
 ASFLAGS=$(CPU)
-LDFLAGS=-T m68k.ld -M
+LDFLAGS=-T m68k.ld
+
+EEPROM=AT28C256
+PREFIX=m68k-
 
 FMT=binary
 
@@ -17,18 +20,25 @@ MAIN=blink
 .PHONY: dump clean
 
 all:	$(MAIN)
-	@echo Builds blink.bin
 
 .s.o:
 	$(AS) $(ASFLAGS) -o $@ $<
 
 $(MAIN): $(OBJS)
 	$(LD) $(LDFLAGS) -o $(MAIN).a $(OBJS)
-	$(COPY) -b 0 -i 2 --interleave-width=1 -O $(FMT) $(MAIN).a even-$(MAIN).bin
-	$(COPY) -b 1 -i 2 --interleave-width=1 -O $(FMT) $(MAIN).a odd-$(MAIN).bin
+	$(COPY) -b 0 -i 2 --interleave-width=1 -O $(FMT) $(MAIN).a $(PREFIX)$(MAIN)-even.bin
+	$(COPY) -b 1 -i 2 --interleave-width=1 -O $(FMT) $(MAIN).a $(PREFIX)$(MAIN)-odd.bin
 
 clean:
-	rm -f *.o even-$(MAIN).bin odd-$(MAIN).bin $(MAIN).a
+	rm -f *.o $(PREFIX)$(MAIN)-even.bin $(PREFIX)$(MAIN)-odd.bin $(MAIN).a
+
+prog_even:
+	@echo Programming $(MAIN)-even onto $(EEPROM)
+	minipro -p "$(EEPROM)" -w $(PREFIX)$(MAIN)-even.bin -s
+
+prog_odd:
+	@echo Programming $(MAIN)-odd onto $(EEPROM)
+	minipro -p "$(EEPROM)" -w $(PREFIX)$(MAIN)-odd -s
 
 dump:	$(MAIN)
 	$(DUMP) $(CPU) -x -D $(MAIN).a
