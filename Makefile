@@ -4,18 +4,18 @@ LD=$(M68K)-ld
 COPY=$(M68K)-objcopy
 DUMP=$(M68K)-objdump
 
-CPU=-m68000
-ASFLAGS=$(CPU)
+ASFLAGS=-m68340 --warn --fatal-warnings
 LDFLAGS=-T m68k.ld
+DUMPFLAGS=-m68020 -x -D
 
 EEPROM=AT28C256
 PREFIX=m68k-
 
 FMT=binary
 
-SRCS=blink.s
+SRCS=loader.s
 OBJS=$(SRCS:.s=.o)
-MAIN=blink
+MAIN=loader
 
 .PHONY: dump clean
 
@@ -30,7 +30,7 @@ $(MAIN): $(OBJS)
 	$(COPY) -b 1 -i 2 --interleave-width=1 -O $(FMT) $(MAIN).a $(PREFIX)$(MAIN)-odd.bin
 
 clean:
-	rm -f *.o $(PREFIX)$(MAIN)-even.bin $(PREFIX)$(MAIN)-odd.bin $(MAIN).a
+	rm -f *.o $(PREFIX)$(MAIN)-even.bin $(PREFIX)$(MAIN)-odd.bin $(PREFIX)$(MAIN).bin $(MAIN).a
 
 prog_even:
 	@echo Programming $(MAIN)-even onto $(EEPROM)
@@ -38,7 +38,7 @@ prog_even:
 
 prog_odd:
 	@echo Programming $(MAIN)-odd onto $(EEPROM)
-	minipro -p "$(EEPROM)" -w $(PREFIX)$(MAIN)-odd -s
+	minipro -p "$(EEPROM)" -w $(PREFIX)$(MAIN)-odd.bin -s
 
 dump:	$(MAIN)
-	$(DUMP) $(CPU) -x -D $(MAIN).a
+	$(DUMP) $(DUMPFLAGS) $(MAIN).a
