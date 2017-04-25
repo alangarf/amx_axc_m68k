@@ -26,6 +26,7 @@ all:	$(MAIN)
 
 $(MAIN): $(OBJS)
 	$(LD) $(LDFLAGS) -o $(MAIN).a $(OBJS)
+	$(COPY) -O $(FMT) $(MAIN).a $(PREFIX)$(MAIN).bin
 	$(COPY) -b 0 -i 2 --interleave-width=1 -O $(FMT) $(MAIN).a $(PREFIX)$(MAIN)-even.bin
 	$(COPY) -b 1 -i 2 --interleave-width=1 -O $(FMT) $(MAIN).a $(PREFIX)$(MAIN)-odd.bin
 

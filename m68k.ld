@@ -7,11 +7,11 @@ MEMORY
 /* stack location */
 stack_size = 1024;
 
-_stack_start = ORIGIN(RAM)+LENGTH(RAM)-0xf010;
+_stack_start = ORIGIN(RAM)+LENGTH(RAM)-0x10;
 _stack_end = _stack_start - stack_size;
 
 /* ram location */
-_ram = ORIGIN(RAM);
+_ram_start = ORIGIN(RAM);
 _ram_end = ORIGIN(RAM)+LENGTH(RAM);
 
 /* system integration module */
@@ -31,7 +31,6 @@ SECTIONS {
   .text 0x400 : {
     . = ALIGN(4);
     *(.text)
-    *(.rodata)
     . = ALIGN(4);
   } > ROM
 
