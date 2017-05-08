@@ -21,29 +21,64 @@
 .title "Program"
 
 .main:
-    move.l #PORT, %a0
+            lea         PORT, %a4
 
-.top:
-    move.b #0x0F, %d0   /* set Q7 to low in the addressable latch mode */
-    move.b %d0, (%a0)   /* write to 'LS259 */
+.blink:     lea         _seq, %a5
+            moveq       #5, %d0
+.loop:
+            moveq       #2, %d1
+            #move.b      %a5@+, %d1
 
-    move.l #DELAY, %d1
-.delay1:
-    tst.l %d1
-    beq .delay1end
-    subq.l #1, %d1
-    jmp .delay1
+.loop1:     bsr.w       .led_on
+            bsr.w       .led_off
+            dbra        %d1, .loop1         | blink led the number of times from %d1
 
-.delay1end:
-    move.b #0x0E, %d0   /* set Q7 to high in the addressable latch mode */
-    move.b %d0, (%a0)   /* write to 'LS259 */
+            bsr.w       .gap                | delay between blink sequence to next
 
-    move.l #DELAY, %d1
-.delay2:
-    tst.l %d1
-    beq .delay2end
-    subq.l #1, %d1
-    jmp .delay2
+            dbra        %d0, .loop          | move to next sequence
 
-.delay2end:
-    jmp .top
+            bra.w       .blink              | run through each sequence again
+
+*************************************************************************
+*
+*  Turn on LED
+*
+.led_on:
+            move.b      #0x0F, %a4@
+            move.l      #50000, %d5
+            bsr.s       .delay
+            rts
+
+*************************************************************************
+*
+*  Turn off LED
+*
+.led_off:
+            move.b      #0x0E, %a4@
+            move.l      #100000, %d5
+            bsr.s       .delay
+            rts
+
+*************************************************************************
+*
+*  Arbitary Delay - Takes delay count via %d5
+*
+.gap:
+            move.l      #1000000, %d5       | delay between blink sequence to next
+            bsr.s       .delay
+            rts
+
+.delay:     tst.l       %d5
+            beq         .delay_end
+            subq.l      #1, %d5
+            bra.s       .delay
+.delay_end: rts
+
+.align 2
+_seq:       .byte       0x01
+            .byte       0x02
+            .byte       0x03
+            .byte       0x04
+            .byte       0x05
+            .byte       0x06
+            .byte       0x07

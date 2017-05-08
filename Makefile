@@ -38,7 +38,7 @@ prog_even:
 
 prog_odd:
 	@echo Programming $(MAIN)-odd onto $(EEPROM)
-	minipro -p "$(EEPROM)" -w $(PREFIX)$(MAIN)-odd -s
+	minipro -p "$(EEPROM)" -w $(PREFIX)$(MAIN)-odd.bin -s
 
 dump:	$(MAIN)
 	$(DUMP) $(CPU) -x -D $(MAIN).a
