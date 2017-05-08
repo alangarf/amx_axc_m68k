@@ -171,8 +171,8 @@ _ram_error:
             bsr         .send_string
 
             clr.l       %d7                         | reset the error flags
-            bsr.s       .load                       | load srec file into RAM
 
+            bsr.s       .load                       | load srec file into RAM
             cmpi.l      #0, %d7                     | check for errors
             bne.s       .srec_error                 | errors found, offer to reset
 
@@ -225,9 +225,9 @@ _ld_s1:
             sub.b       #3, %d0                     | subtract 3 from record length
             move.b      %d0, %d2                    | save byte count in d2
             clr.l       %d0                         | clear address accumulator
-            bsr.s       _ld_get_byte                | get MS byte of load address
+            bsr.w       _ld_get_byte                | get MS byte of load address
             asl.l       #8, %d0                     | move it to MS position 
-            bsr.s       _ld_get_byte                | get LS byte in D2
+            bsr.w       _ld_get_byte                | get LS byte in D2
             move.l      %d0, %a2                    | a2 points to destination of data
             bra.s       _ld_data                    | load the data
 
@@ -275,7 +275,7 @@ _ld_data:   bsr.s       _ld_get_byte                | get byte of data for loadi
             bne.s       _ld_data                    | repeat until count = 0
             bsr.s       _ld_get_byte                | read checksum
             add.b       #1, %d3                     | add 1 to total checksum
-            beq.w       .load                       | if zero then start next record
+            beq.w       _ld_data_ok                 | if zero then  draw a dot to console
             or.b        #0b00001000, %d7            | else set checksum error bit,
 
 _ld_terminate:
@@ -289,6 +289,12 @@ _ld_chksum:
             beq.s       _ld_exit                    | if no errors return
             lea         _err_checksum, %a0          | send error message to console
             bsr.w       .send_string
+            bra.s       _ld_exit
+
+_ld_data_ok:
+            move.b      #'.', %d0                   | send a '.' to console
+            bsr         .send_char
+            bra         .load                       | get next record
 
 _ld_exit:
             rts

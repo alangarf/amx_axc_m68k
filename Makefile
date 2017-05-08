@@ -8,7 +8,8 @@ ASFLAGS=-m68340 --warn --fatal-warnings
 LDFLAGS=-T m68k.ld
 DUMPFLAGS=-m68020 -x -D
 
-EEPROM=AT28C256
+#EEPROM=AT28C256
+EEPROM=SST39SF010A
 PREFIX=m68k-
 
 FMT=binary
@@ -43,3 +44,6 @@ prog_odd:
 
 dump:	$(MAIN)
 	$(DUMP) $(DUMPFLAGS) $(MAIN).a
+
+vg:
+	vagrant ssh -c "cd /vagrant/loader/; make"
